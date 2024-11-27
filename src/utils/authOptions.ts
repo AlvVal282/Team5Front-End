@@ -18,7 +18,7 @@ export const authOptions: NextAuthOptions = {
         try {
           const user = await axios.post('/login', {
             password: credentials?.password,
-            email: credentials?.email
+            username: credentials?.email
           });
           if (user) {
             user.data.user['accessToken'] = user.data.accessToken;
