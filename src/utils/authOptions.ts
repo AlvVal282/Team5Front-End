@@ -11,14 +11,14 @@ export const authOptions: NextAuthOptions = {
       id: 'login',
       name: 'login',
       credentials: {
-        email: { name: 'email', label: 'Email', type: 'email', placeholder: 'Enter Email' },
+        username: { name: 'username', label: 'Username', type: 'text', placeholder: 'Enter Username' },
         password: { name: 'password', label: 'Password', type: 'password', placeholder: 'Enter Password' }
       },
       async authorize(credentials) {
         try {
           const user = await axios.post('/login', {
             password: credentials?.password,
-            username: credentials?.email
+            username: credentials?.username
           });
           if (user) {
             user.data.user['accessToken'] = user.data.accessToken;
@@ -38,7 +38,8 @@ export const authOptions: NextAuthOptions = {
         firstname: { name: 'firstname', label: 'Firstname', type: 'text', placeholder: 'Enter Firstname' },
         lastname: { name: 'lastname', label: 'Lastname', type: 'text', placeholder: 'Enter Lastname' },
         email: { name: 'email', label: 'Email', type: 'email', placeholder: 'Enter Email' },
-        company: { name: 'company', label: 'Company', type: 'text', placeholder: 'Enter Company' },
+        phone: { name: 'phone', label: 'Phone', type: 'text', placeholder: 'Enter Phone Number' },
+        username: { name: 'username', label: 'Username', type: 'text', placeholder: 'Enter Username' },
         password: { name: 'password', label: 'Password', type: 'password', placeholder: 'Enter Password' }
       },
       async authorize(credentials) {
@@ -46,12 +47,11 @@ export const authOptions: NextAuthOptions = {
           const user = await axios.post('/register', {
             firstname: credentials?.firstname,
             lastname: credentials?.lastname,
-            company: credentials?.company,
-            password: credentials?.password,
             email: credentials?.email,
+            password: credentials?.password,
+            username: credentials?.username,
             role: 1,
-            username: credentials?.email,
-            phone: '728-238-2380'
+            phone: credentials?.phone,
           });
 
           console.dir(user);

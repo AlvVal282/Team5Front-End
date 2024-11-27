@@ -58,6 +58,7 @@ export default function AuthRegister({ providers, csrfToken }: any) {
   useEffect(() => {
     changePassword('');
   }, []);
+  const phoneRegExp = /^[0-9]{3}-[0-9]{3}-[0-9]{4}$/;
 
   return (
     <>
@@ -66,8 +67,9 @@ export default function AuthRegister({ providers, csrfToken }: any) {
           firstname: '',
           lastname: '',
           email: '',
-          company: '',
+          phone: '',
           password: '',
+          username: '',
           submit: null
         }}
         validationSchema={Yup.object().shape({
@@ -77,7 +79,12 @@ export default function AuthRegister({ providers, csrfToken }: any) {
           password: Yup.string()
             .required('Password is required')
             .test('no-leading-trailing-whitespace', 'Password cannot start or end with spaces', (value) => value === value.trim())
-            .max(10, 'Password must be less than 10 characters')
+            .max(64, 'Password must be less than 10 characters'),
+          username: Yup.string()
+            .required('Username is required')
+            .test('no-leading-trailing-whitespace', 'Password cannot start or end with spaces', (value) => value === value.trim())
+            .max(64, 'Password must be less than 10 characters'),
+          phone: Yup.string().matches(phoneRegExp, 'Phone number is not valid')
         })}
         onSubmit={async (values, { setErrors, setSubmitting }) => {
           const trimmedEmail = values.email.trim();
@@ -87,7 +94,8 @@ export default function AuthRegister({ providers, csrfToken }: any) {
             lastname: values.lastname,
             email: trimmedEmail,
             password: values.password,
-            company: values.company,
+            username: values.username,
+            phone: values.phone,
             callbackUrl: APP_DEFAULT_PATH
           }).then((res: any) => {
             if (res?.error) {
@@ -146,22 +154,43 @@ export default function AuthRegister({ providers, csrfToken }: any) {
               </Grid>
               <Grid item xs={12}>
                 <Stack spacing={1}>
-                  <InputLabel htmlFor="company-signup">Company</InputLabel>
+                  <InputLabel htmlFor="phone-signup">Phone</InputLabel>
                   <OutlinedInput
                     fullWidth
-                    error={Boolean(touched.company && errors.company)}
-                    id="company-signup"
-                    value={values.company}
-                    name="company"
+                    error={Boolean(touched.phone && errors.phone)}
+                    id="phone-signup"
+                    value={values.phone}
+                    name="phone"
                     onBlur={handleBlur}
                     onChange={handleChange}
-                    placeholder="Enter your company name"
+                    placeholder="Enter your phone number"
                     inputProps={{}}
                   />
                 </Stack>
-                {touched.company && errors.company && (
-                  <FormHelperText error id="helper-text-company-signup">
-                    {errors.company}
+                {touched.phone && errors.phone && (
+                  <FormHelperText error id="helper-text-phone-signup">
+                    {errors.phone}
+                  </FormHelperText>
+                )}
+              </Grid>
+              <Grid item xs={12}>
+                <Stack spacing={1}>
+                  <InputLabel htmlFor="username-signup">Username</InputLabel>
+                  <OutlinedInput
+                    fullWidth
+                    error={Boolean(touched.username && errors.username)}
+                    id="username-signup"
+                    value={values.username}
+                    name="username"
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    placeholder="Enter your username"
+                    inputProps={{}}
+                  />
+                </Stack>
+                {touched.username && errors.username && (
+                  <FormHelperText error id="helper-text-username-signup">
+                    {errors.username}
                   </FormHelperText>
                 )}
               </Grid>
