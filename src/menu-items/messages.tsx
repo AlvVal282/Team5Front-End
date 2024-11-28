@@ -47,27 +47,27 @@ const pages: NavItemType = {
     },
     {
       id: 'books',
-      title: <FormattedMessage id="books" defaultMessage="Books" style={{ textTransform: 'capitalize' }} />,
+      title: <FormattedMessage id="books" defaultMessage="Books" />,
       type: 'collapse',
       icon: icons.BookmarksIcon,
       children: [
         {
           id: 'retrieve-books',
-          title: <FormattedMessage id="retrieve" defaultMessage="Search" style={{ textTransform: 'capitalize' }} />,
+          title: <FormattedMessage id="retrieve" defaultMessage="Search" />,
           type: 'item',
           url: '/books/retrieve',
           icon: icons.BookIcon
         },
         {
           id: 'create-book',
-          title: <FormattedMessage id="create" defaultMessage="Create" style={{ textTransform: 'capitalize' }} />,
+          title: <FormattedMessage id="create" defaultMessage="Create" />,
           type: 'item',
           url: '/books/create',
           icon: icons.AddIcon
         },
         {
           id: 'delete-books',
-          title: <FormattedMessage id="delete" defaultMessage="Delete" style={{ textTransform: 'capitalize' }} />,
+          title: <FormattedMessage id="delete" defaultMessage="Delete" />,
           type: 'item',
           url: '/books/delete',
           icon: icons.DeleteIcon
