@@ -154,7 +154,7 @@ export default function AuthRegister({ providers, csrfToken }: any) {
               </Grid>
               <Grid item xs={12}>
                 <Stack spacing={1}>
-                  <InputLabel htmlFor="phone-signup">Phone</InputLabel>
+                  <InputLabel htmlFor="phone-signup">Phone*</InputLabel>
                   <OutlinedInput
                     fullWidth
                     error={Boolean(touched.phone && errors.phone)}
@@ -175,7 +175,7 @@ export default function AuthRegister({ providers, csrfToken }: any) {
               </Grid>
               <Grid item xs={12}>
                 <Stack spacing={1}>
-                  <InputLabel htmlFor="username-signup">Username</InputLabel>
+                  <InputLabel htmlFor="username-signup">Username*</InputLabel>
                   <OutlinedInput
                     fullWidth
                     error={Boolean(touched.username && errors.username)}
