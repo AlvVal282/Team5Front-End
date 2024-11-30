@@ -78,13 +78,17 @@ export default function AuthRegister({ providers, csrfToken }: any) {
           email: Yup.string().email('Must be a valid email').max(255).required('Email is required'),
           password: Yup.string()
             .required('Password is required')
-            .test('no-leading-trailing-whitespace', 'Password cannot start or end with spaces', (value) => value === value.trim())
-            .max(64, 'Password must be less than 10 characters'),
+            .min(8, 'Password must be at least 8 characters long')
+            .max(20, 'Password must not exceed 20 characters')
+            .matches(
+              /^[A-Za-z][A-Za-z0-9!@#$%^&*]{7,19}$/,
+              'Password must start with a letter and can contain letters, numbers, and the special characters !, @, #, $, %, ^, &, *.'
+            ),
           username: Yup.string()
             .required('Username is required')
             .test('no-leading-trailing-whitespace', 'Password cannot start or end with spaces', (value) => value === value.trim())
             .max(64, 'Password must be less than 10 characters'),
-          phone: Yup.string().matches(phoneRegExp, 'Phone number is not valid')
+          phone: Yup.string().matches(phoneRegExp, 'Phone number is not valid (e.g. 123-456-7890)')
         })}
         onSubmit={async (values, { setErrors, setSubmitting }) => {
           const trimmedEmail = values.email.trim();

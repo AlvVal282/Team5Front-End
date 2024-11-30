@@ -21,16 +21,12 @@ import Typography from '@mui/material/Typography';
 // third party
 import * as Yup from 'yup';
 import { Formik } from 'formik';
-import { preload } from 'swr';
 
 // project import
 import IconButton from 'components/@extended/IconButton';
 import AnimateButton from 'components/@extended/AnimateButton';
 
 import { APP_DEFAULT_PATH } from 'config';
-import { fetcher } from 'utils/axios';
-
-import useScriptRef from 'hooks/useScriptRef';
 import { strengthColor, strengthIndicator } from 'utils/password-strength';
 
 // types
@@ -78,11 +74,18 @@ export default function AuthResetPassword() {
       validationSchema={Yup.object().shape({
         username: Yup.string().required('Username is required'),
         oldPassword: Yup.string().required('Old Password is required'),
-        newPassword: Yup.string().max(255).required('Password is required'),
+        newPassword: Yup.string()
+          .required('Password is required')
+          .min(8, 'Password must be at least 8 characters long')
+          .max(20, 'Password must not exceed 20 characters')
+          .matches(
+            /^[A-Za-z][A-Za-z0-9!@#$%^&*]{7,19}$/,
+            'Password must start with a letter and can contain letters, numbers, and the special characters !, @, #, $, %, ^, &, *.'
+          ),
         confirmPassword: Yup.string()
           .required('Confirm Password is required')
-          .test('confirmPassword', 'Both Password must match!', (confirmPassword, yup) => yup.parent.newPassword === confirmPassword)
-      })}
+          .oneOf([Yup.ref('newPassword')], 'Both Password must match!')
+      })}      
       onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
         const trimmedusername = values.username.trim();
           signIn('reset-password', {
