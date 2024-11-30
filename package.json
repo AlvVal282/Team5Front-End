@@ -18,10 +18,11 @@
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",
     "@mui/base": "5.0.0-beta.40",
-    "@mui/icons-material": "^5.15.16",
+    "@mui/icons-material": "^5.16.8",
     "@mui/lab": "^5.0.0-alpha.173",
-    "@mui/material": "^5.16.6",
+    "@mui/material": "^5.16.8",
     "@mui/system": "^5.16.6",
+    "@react-three/fiber": "^8.17.10",
     "axios": "^1.7.3",
     "book-cover-3d": "^1.1.2",
     "formik": "^2.4.6",
@@ -39,6 +40,7 @@
     "simplebar-react": "^3.2.6",
     "stylis-plugin-rtl": "^2.1.1",
     "swr": "^2.2.5",
+    "three": "^0.171.0",
     "yup": "^1.4.0"
   },
   "devDependencies": {
