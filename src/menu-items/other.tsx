@@ -6,6 +6,7 @@ import QuestionOutlined from '@ant-design/icons/QuestionOutlined';
 import StopOutlined from '@ant-design/icons/StopOutlined';
 import PhoneOutlined from '@ant-design/icons/PhoneOutlined';
 import FullscreenOutlined from '@ant-design/icons/FullscreenOutlined';
+import KeyOutlined from '@ant-design/icons/KeyOutlined'; // New icon for Reset Password
 
 // type
 import { NavItemType } from 'types/menu';
@@ -15,7 +16,8 @@ const icons = {
   QuestionOutlined,
   StopOutlined,
   PhoneOutlined,
-  FullscreenOutlined
+  FullscreenOutlined,
+  KeyOutlined // Add the new icon here
 };
 
 // ==============================|| MENU ITEMS - SUPPORT ||============================== //
@@ -48,6 +50,13 @@ const other: NavItemType = {
       icon: icons.QuestionOutlined,
       external: true,
       target: true
+    },
+    {
+      id: 'reset-password', // New menu item for Reset Password
+      title: <FormattedMessage id="reset-password" />,
+      type: 'item',
+      url: '/reset-password',
+      icon: icons.KeyOutlined
     }
   ]
 };
