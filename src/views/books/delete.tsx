@@ -28,14 +28,14 @@ const EMPTY_ALERT: IAlert = {
   alertSeverity: ''
 };
 
-export default function MessageSend() {
+export default function Delete() {
   const [priority, setPriority] = React.useState(1);
   const [alert, setAlert] = React.useState(EMPTY_ALERT);
 
   const onSuccess = () => {
     setAlert({
       showAlert: true,
-      alertMessage: 'The message was sent!',
+      alertMessage: 'The book(s) were successfully deleted!',
       alertSeverity: 'success'
     });
   };
