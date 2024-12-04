@@ -4,7 +4,7 @@ import * as React from 'react';
 import Avatar from '@mui/material/Avatar';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
-import SendIcon from '@mui/icons-material/Send';
+import DeleteIcon from '@mui/icons-material/Delete';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
@@ -13,6 +13,7 @@ import { Alert } from '@mui/material';
 // Project imports
 import PrioritySelector from 'components/PrioritySelector';
 import DeleteBooks from 'sections/books/book-forms/DeleteBooks';
+import { grey } from '@mui/material/colors';
 
 const defaultTheme = createTheme();
 
@@ -64,18 +65,18 @@ export default function Delete() {
             marginTop: 8,
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'center'
+            alignItems: 'center',
           }}
         >
-          <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-            <SendIcon />
+          <Avatar sx={{ m: 1, bgcolor: grey }}>
+            <DeleteIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
-            Send Messages
+            Delete By...
           </Typography>
-
-          <Box sx={{ mt: 1 }}>
+          <Box sx={{ mt: 1}}>
             <PrioritySelector initialValue={priority} onClick={handlePriorityClick} />
+            <br/>
             <DeleteBooks priority={priority} onSuccess={onSuccess} onError={onError} />
           </Box>
         </Box>

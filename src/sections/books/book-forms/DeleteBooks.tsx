@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect} from 'react';
 
 // material-ui
 import Button from '@mui/material/Button';
@@ -10,6 +10,7 @@ import InputLabel from '@mui/material/InputLabel';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import {Card, CardContent, Rating, Box, CardMedia} from '@mui/material';
 
 // third party
 import * as Yup from 'yup';
@@ -32,6 +33,7 @@ interface IDeletedBook {
   averageRating: string;
   ratingCount: number;
   coverImage: string;
+  publication: number;
 }
 
 
@@ -41,18 +43,15 @@ export default function DeleteBooks({
   onError
 }: IDeleteBooksProps) {
   const [deletedBooks, setDeletedBooks] = useState<IDeletedBook[]>([]);
+  const [showDeletedBooks, setShowDeletedBooks] = useState<boolean>(false); 
 
-  
-  const placeholderText = {
-    1: "Enter ISBN Number",
-    2: "Enter Author's Name",
-    3: "Enter Book Title"
-  };
-  const labelText = {
-    1: "ISBN Number",
-    2: "Author's Name",
-    3: "Book Title"
-  };
+  useEffect(() => {
+    setShowDeletedBooks(false); // Hide deleted books when priority changes
+  }, [priority]);
+
+
+  const placeholderText = ["Enter ISBN Number", "Enter Author's Name", "Enter Book Title"];
+  const labelText = ["ISBN Number", "Author's Name", "Book Title"];
   return (
     <>
       <Formik
@@ -61,7 +60,7 @@ export default function DeleteBooks({
           submit: null
         }}
         validationSchema={Yup.object().shape({
-          value: Yup.string().max(255).required(() => `${labelText[priority] || ''} value is required`),
+          value: Yup.string().max(255).required(() => `${labelText[priority - 1]} value is required`),
         })}
         onSubmit={(values, { setErrors, setSubmitting, resetForm }) => {
           let apiEndpoint = '';
@@ -87,12 +86,14 @@ export default function DeleteBooks({
                 const result = response.data.result;
                 const deletedBookDetails = {
                   isbn: result.isbn13 || 'N/A',
-                  title: result.title || 'Unkown Title',
-                  authors: result.author || 'Unkown Author(s)',
+                  title: result.title || 'Unknown Title',
+                  authors: result.authors || 'Unknown Author(s)',
                   averageRating: result.ratings?.average || 'No Rating',
                   ratingCount: result.ratings?.count || 0,
-                  coverImage: result.icons?.large || '',
+                  coverImage: result.icons?.large,
+                  publication: result.publication || 'Unknown Year'
                 };
+                setShowDeletedBooks(true);
                 setDeletedBooks([deletedBookDetails]);
 
               } else if (priority > 1 && response.data.results) {
@@ -104,10 +105,13 @@ export default function DeleteBooks({
                   averageRating: book.ratings?.average || 'No Rating',
                   ratingCount: book.ratings?.count || 0,
                   coverImage: book.icons?.large || '',
+                  publication: book.publication || 'Unknown Year'
                 }));
+                setShowDeletedBooks(true);
                 setDeletedBooks(deletedBookDetails);
 
               } else {
+                setShowDeletedBooks(false);
                 setDeletedBooks([]);
                 onError('No books were deleted or result is not an array.');
 
@@ -120,6 +124,7 @@ export default function DeleteBooks({
               setErrors({ value: errorMessage });
               setSubmitting(false);
               onError(errorMessage);
+              setShowDeletedBooks(false);
             });
         }}
         >
@@ -128,7 +133,7 @@ export default function DeleteBooks({
             <Grid container spacing={3}>
               <Grid item xs={12}>
                 <Stack spacing={1}>
-                  <InputLabel htmlFor="name">Delete by {labelText[priority]}</InputLabel>
+                  <InputLabel htmlFor="name">Delete by {labelText[priority - 1]}</InputLabel>
                   <OutlinedInput
                     id="book-name"
                     type="text"
@@ -136,7 +141,7 @@ export default function DeleteBooks({
                     name="value"
                     onBlur={handleBlur}
                     onChange={handleChange}
-                    placeholder={placeholderText[priority] || "Enter value"}
+                    placeholder={placeholderText[priority - 1]}
                     fullWidth
                     error={Boolean(touched.value && errors.value)}
                   />
@@ -150,7 +155,7 @@ export default function DeleteBooks({
               <Grid item xs={12}>
                 <AnimateButton>
                   <Button disableElevation disabled={isSubmitting} fullWidth size="large" type="submit" variant="contained" color="primary">
-                    SEND!
+                    DELETE
                   </Button>
                 </AnimateButton>
               </Grid>
@@ -158,40 +163,58 @@ export default function DeleteBooks({
           </form>
         )}
       </Formik>
-
-      {deletedBooks.length > 0 && (
-        <Grid container spacing={3} style={{ marginTop: '20px' }}>
-          <Grid item xs={12}>
-            <Typography variant="h6">Deleted Books:</Typography>
-            <Grid container spacing={2}>
-                {deletedBooks.map((book, index) => (
-                  <Grid item xs={12} md={6} key={index}>
-                    <Typography variant="body1">
-                      <strong>Title:</strong> {book.title}
+      {showDeletedBooks && deletedBooks.length > 0 && (
+        <Grid item xs={15} sm={8}>
+          <Typography variant="h4" gutterBottom>
+            Book(s) Deleted:
+          </Typography>
+          <Box 
+            sx={{
+              maxHeight: 500,  
+              overflowY: 'auto',  
+              paddingRight: 2,  
+            }}
+          >
+            {deletedBooks.map((book, index) => (
+              <Card 
+                key={index} 
+                sx={{ display: 'flex', flexDirection: 'row', mb: 2 }} 
+              >
+                <CardMedia
+                  component="img"
+                  sx={{ width: 'max-content', height: 'max-content', objectFit: 'fill' }}
+                  image={book.coverImage || 'default-image.jpg'}
+                  alt={book.title}
+                />
+                <CardContent sx={{ flex: 1 }}>
+                  <Typography variant="h4" gutterBottom>
+                    {book.title}
+                  </Typography>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Author(s): {book.authors}
+                  </Typography>
+                  <Typography variant="body1" gutterBottom>
+                    Publication Year: {book.publication}
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+                    <Typography variant="body2" sx={{ mr: 1 }}>
+                      {parseFloat(book.averageRating).toFixed(1)} 
                     </Typography>
-                    <Typography variant="body2">
-                      <strong>Authors:</strong> {book.authors}
+                    <Rating
+                      value={parseFloat(book.averageRating)} 
+                      precision={0.1}
+                      readOnly
+                    />
+                    <Typography variant="body2" sx={{ ml: 1 }}>
+                      {book.ratingCount} ratings
                     </Typography>
-                    <Typography variant="body2">
-                      <strong>ISBN:</strong> {book.isbn}
-                    </Typography>
-                    <Typography variant="body2">
-                      <strong>Average Rating:</strong> {book.averageRating} ({book.ratingCount} ratings)
-                    </Typography>
-                    {book.coverImage && (
-                      <img
-                        src={book.coverImage}
-                        alt={book.title || 'Cover'}
-                        style={{ maxWidth: '100px', marginTop: '10px' }}
-                      />
-                    )}
-                  </Grid>
-                ))}
-            </Grid>
-          </Grid>
+                  </Box>
+                </CardContent>
+              </Card>
+            ))}
+          </Box>
         </Grid>
       )}
-
     </>
   );
 }
