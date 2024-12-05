@@ -46,7 +46,7 @@ export default function DeleteBooks({
   const [showDeletedBooks, setShowDeletedBooks] = useState<boolean>(false); 
 
   useEffect(() => {
-    setShowDeletedBooks(false); // Hide deleted books when priority changes
+    setShowDeletedBooks(false);
   }, [priority]);
 
 
