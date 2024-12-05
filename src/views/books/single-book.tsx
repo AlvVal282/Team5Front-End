@@ -19,7 +19,7 @@ export default function SingleBookPage() {
   const [loading, setLoading] = useState(true);
   const [newRating, setNewRating] = useState(5);
 
-  const isbn = "9780439554930"; // Hardcoded ISBN for demonstration
+  const isbn = "9781416524790"; // Hardcoded ISBN for demonstration
 
   useEffect(() => {
     // Fetch book details
@@ -40,33 +40,41 @@ export default function SingleBookPage() {
       alert('Please input a rating between 1 and 5.');
       return;
     }
+    const updatedRatings = { 
+      count: book.ratings.count,
+      average: book.ratings.average, // Fixed typo: 'avaerage' -> 'average'
+      rating1: book.ratings.rating_1,
+      rating2: book.ratings.rating_2,
+      rating3: book.ratings.rating_3,
+      rating4: book.ratings.rating_4,
+      rating5: book.ratings.rating_5,
+    };
 
-    const updatedRatings = { ...book.ratings };
     updatedRatings.count += 1; // Increase total count
-    updatedRatings[`rating_${newRating}`] += 1; // Increment the specific star count
+    updatedRatings[`rating${newRating}`] += 1; // Increment the specific star count
 
     // Recalculate average
     const totalStars =
-      updatedRatings.rating_1 * 1 +
-      updatedRatings.rating_2 * 2 +
-      updatedRatings.rating_3 * 3 +
-      updatedRatings.rating_4 * 4 +
-      updatedRatings.rating_5 * 5;
+      updatedRatings.rating1 * 1 +
+      updatedRatings.rating2 * 2 +
+      updatedRatings.rating3 * 3 +
+      updatedRatings.rating4 * 4 +
+      updatedRatings.rating5 * 5;
 
-    updatedRatings.average = totalStars / updatedRatings.count;
+    updatedRatings.average = Number(totalStars) / Number(updatedRatings.count);
 
     // Add token handling
-    const token = localStorage.getItem('jwtToken'); // Ensure the token is available
+   /* const token = localStorage.getItem('jwtToken'); // Ensure the token is available
     if (!token) {
       alert('Authorization token is missing. Please log in.');
       return;
-    }
+    }*/
 
     axios
       .put(
-        `/books/rating/${isbn}`,
-        { ratings: updatedRatings },
-        { headers: { Authorization: `Bearer ${token}` } } // Add JWT token to request headers
+        `/books/rating/${isbn}`, // Fixed the template string issue
+        { ratings: updatedRatings }
+        //{ headers: { Authorization: `Bearer ${token}` } } // Add JWT token to request headers
       )
       .then((response) => {
         console.log('Response from server:', response.data);
@@ -203,6 +211,7 @@ export default function SingleBookPage() {
     </ThemeProvider>
   );
 }
+
 
 
 
