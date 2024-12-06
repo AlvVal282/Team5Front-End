@@ -21,22 +21,6 @@ import AnimateButton from 'components/@extended/AnimateButton';
 
 import axios from 'utils/axios';
 
-// const BookSchema = Yup.object().shape({
-//   isbn: Yup.string().required('ISBN is required'),
-//   authors: Yup.string().required('Authors are required'),
-//   publicationYear: Yup.number().required('Publication Year is required'),
-//   originalTitle: Yup.string().required('Original Title is required'),
-//   title: Yup.string().required('Title is required'),
-//   totalRatingCount: Yup.number().required('Total Rating Count is required'),
-//   averageRating: Yup.number().required('Average Rating is required'),
-//   oneStarRating: Yup.number().required('1 Star Rating Count is required'),
-//   twoStarRating: Yup.number().required('2 Star Rating Count is required'),
-//   threeStarRating: Yup.number().required('3 Star Rating Count is required'),
-//   fourStarRating: Yup.number().required('4 Star Rating Count is required'),
-//   fiveStarRating: Yup.number().required('5 Star Rating Count is required'),
-//   largeImageUrl: Yup.string().url('Invalid URL').required('Large Image URL is required'),
-//   smallImageUrl: Yup.string().url('Invalid URL').required('Small Image URL is required')
-// });
 export default function CreateBookForm({ onSuccess, onError }: { onSuccess: () => void; onError: (msg: string) => void }) {
   return (
     <>
