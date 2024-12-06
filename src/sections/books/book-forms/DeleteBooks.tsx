@@ -10,7 +10,8 @@ import InputLabel from '@mui/material/InputLabel';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import {Card, CardContent, Rating, Box, CardMedia} from '@mui/material';
+import {Card, CardContent, Rating, Box } from '@mui/material';
+import { BookCover } from 'book-cover-3d'
 
 // third party
 import * as Yup from 'yup';
@@ -52,6 +53,12 @@ export default function DeleteBooks({
 
   const placeholderText = ["Enter ISBN Number", "Enter Author's Name", "Enter Book Title"];
   const labelText = ["ISBN Number", "Author's Name", "Book Title"];
+  const validationString = Yup.object().shape({
+    value: Yup.string().max(255).required(() => `${labelText[priority - 1]} value is required`),
+  });
+  const validationNumber = Yup.object().shape({
+    value: Yup.string().max(255).matches(/^\d+$/, "ISBN value must be a number").required(() => `${labelText[priority - 1]} value is required`),
+  });
   return (
     <>
       <Formik
@@ -59,9 +66,7 @@ export default function DeleteBooks({
           value: '',
           submit: null
         }}
-        validationSchema={Yup.object().shape({
-          value: Yup.string().max(255).required(() => `${labelText[priority - 1]} value is required`),
-        })}
+        validationSchema={priority === 1 ? validationNumber : validationString}
         onSubmit={(values, { setErrors, setSubmitting, resetForm }) => {
           let apiEndpoint = '';
           if (priority === 1) {
@@ -90,7 +95,7 @@ export default function DeleteBooks({
                   authors: result.authors || 'Unknown Author(s)',
                   averageRating: result.ratings?.average || 'No Rating',
                   ratingCount: result.ratings?.count || 0,
-                  coverImage: result.icons?.large,
+                  coverImage: result.icons?.small || '',
                   publication: result.publication || 'Unknown Year'
                 };
                 setShowDeletedBooks(true);
@@ -104,7 +109,7 @@ export default function DeleteBooks({
                   authors: book.authors || 'Unknown Author(s)',
                   averageRating: book.ratings?.average || 'No Rating',
                   ratingCount: book.ratings?.count || 0,
-                  coverImage: book.icons?.large || '',
+                  coverImage: book.icons?.small || '',
                   publication: book.publication || 'Unknown Year'
                 }));
                 setShowDeletedBooks(true);
@@ -164,53 +169,70 @@ export default function DeleteBooks({
         )}
       </Formik>
       {showDeletedBooks && deletedBooks.length > 0 && (
-        <Grid item xs={15} sm={8}>
+        <Grid item xs={15} sm='auto'>
           <Typography variant="h4" gutterBottom>
             Book(s) Deleted:
           </Typography>
-          <Box 
+          <Box
             sx={{
-              maxHeight: 500,  
-              overflowY: 'auto',  
-              paddingRight: 2,  
+              maxHeight: 500,
+              overflowY: 'auto',
+              paddingRight: 2,
             }}
           >
             {deletedBooks.map((book, index) => (
-              <Card 
-                key={index} 
-                sx={{ display: 'flex', flexDirection: 'row', mb: 2 }} 
-              >
-                <CardMedia
-                  component="img"
-                  sx={{ width: 'max-content', height: 'max-content', objectFit: 'fill' }}
-                  image={book.coverImage || 'default-image.jpg'}
-                  alt={book.title}
-                />
-                <CardContent sx={{ flex: 1 }}>
-                  <Typography variant="h4" gutterBottom>
-                    {book.title}
-                  </Typography>
-                  <Typography variant="subtitle2" gutterBottom>
-                    Author(s): {book.authors}
-                  </Typography>
-                  <Typography variant="body1" gutterBottom>
-                    Publication Year: {book.publication}
-                  </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-                    <Typography variant="body2" sx={{ mr: 1 }}>
-                      {parseFloat(book.averageRating).toFixed(1)} 
-                    </Typography>
-                    <Rating
-                      value={parseFloat(book.averageRating)} 
-                      precision={0.1}
-                      readOnly
+              <Grid sm = 'auto' container spacing={1} key={ index } sx ={{
+                marginTop: 1,
+                marginBottom: 4
+              }}>
+                <Grid sm = 'auto' item xs={12}>
+                  <BookCover
+                    rotate={30}
+                    rotateHover={10}
+                    perspective={600}
+                    transitionDuration={300}
+                    radius={5}
+                    thickness={20}
+                    bgColor="#1e3a8a"
+                    width={125}
+                    height={175}
+                    pagesOffset={3}
+                  >
+                    <img
+                      src={ book.coverImage || '/assets/default-book.png' }
+                      alt={book.title || 'Book Cover'}
                     />
-                    <Typography variant="body2" sx={{ ml: 1 }}>
-                      {book.ratingCount} ratings
-                    </Typography>
-                  </Box>
-                </CardContent>
-              </Card>
+                  </BookCover>
+                </Grid>
+                <Grid item xs={12} sm={8}>
+                  <Card sx={{ display: 'flex', flexDirection: 'row', mb: 2 }}>
+                    <CardContent sx={{ flex: 1 }}>
+                      <Typography variant="h4" gutterBottom>
+                        {book.title || 'Untitled'}
+                      </Typography>
+                      <Typography variant="subtitle2" gutterBottom>
+                        Author(s): {book.authors || 'Unknown'}
+                      </Typography>
+                      <Typography variant="body1" gutterBottom>
+                        Publication Year: {book.publication || 'N/A'}
+                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+                        <Typography variant="body2" sx={{ mr: 1 }}>
+                          {parseFloat(book.averageRating).toFixed(1)}
+                        </Typography>
+                        <Rating
+                          value={parseFloat(book.averageRating)}
+                          precision={0.1}
+                          readOnly
+                        />
+                        <Typography variant="body2" sx={{ ml: 1 }}>
+                          {book.ratingCount || 0} ratings
+                        </Typography>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              </Grid>
             ))}
           </Box>
         </Grid>
