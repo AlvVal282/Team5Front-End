@@ -54,8 +54,8 @@ export default function CreateBookForm({ onSuccess, onError }: { onSuccess: () =
           threeStarRating: '',
           fourStarRating: '',
           fiveStarRating: '',
-          largeImageURL: '',
-          smallImageURL: '',
+          largeImageURL: 'https://s.gr-assets.com/assets/nophoto/book/111x148-bcc042a9c91a29c1d680899eff700a03.png',
+          smallImageURL: 'https://s.gr-assets.com/assets/nophoto/book/50x75-a91bf249278a81aabab721ef782c4a74.png',
           submit: null
         }}
         validationSchema={Yup.object().shape({
@@ -116,8 +116,8 @@ export default function CreateBookForm({ onSuccess, onError }: { onSuccess: () =
                   threeStarRating: '',
                   fourStarRating: '',
                   fiveStarRating: '',
-                  largeImageURL: '',
-                  smallImageURL: '',
+                  largeImageURL: 'https://s.gr-assets.com/assets/nophoto/book/111x148-bcc042a9c91a29c1d680899eff700a03.png',
+                  smallImageURL: 'https://s.gr-assets.com/assets/nophoto/book/50x75-a91bf249278a81aabab721ef782c4a74.png',
                   submit: null
                 }
               });
@@ -396,7 +396,7 @@ export default function CreateBookForm({ onSuccess, onError }: { onSuccess: () =
                     name="largeImageURL"
                     onBlur={handleBlur}
                     onChange={handleChange}
-                    placeholder="Enter the large image URL"
+                    defaultValue="https://s.gr-assets.com/assets/nophoto/book/111x148-bcc042a9c91a29c1d680899eff700a03.png"
                     fullWidth
                     error={Boolean(touched.largeImageURL && errors.largeImageURL)}
                   />
@@ -417,7 +417,7 @@ export default function CreateBookForm({ onSuccess, onError }: { onSuccess: () =
                     name="smallImageURL"
                     onBlur={handleBlur}
                     onChange={handleChange}
-                    placeholder="Enter the small image URL"
+                    defaultValue="https://s.gr-assets.com/assets/nophoto/book/50x75-a91bf249278a81aabab721ef782c4a74.png"
                     fullWidth
                     error={Boolean(touched.smallImageURL && errors.smallImageURL)}
                   />
