@@ -34,7 +34,7 @@ export default function SingleBookPage() {
   const [alert, setAlert] = useState<IAlert>(EMPTY_ALERT);
   const [trigger, setTrigger] = useState(0); 
 
-  const isbn = '9781416524790'; 
+  const isbn = '9781416524791'; 
 
   useEffect(() => {
     axios
