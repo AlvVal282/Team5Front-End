@@ -22,46 +22,45 @@ import AnimateButton from 'components/@extended/AnimateButton';
 import axios from 'utils/axios';
 
 export default function CreateBookForm({ onSuccess, onError }: { onSuccess: () => void; onError: (msg: string) => void }) {
+  console.log('Got here');
   return (
     <>
       <Formik
         initialValues={{
-          isbn13: '',
-          authors: '',
-          publicationYear: '',
-          originalTitle: '',
-          title: '',
-          totalRatingCount: '',
-          averageRating: '',
-          oneStarRating: '',
-          twoStarRating: '',
-          threeStarRating: '',
-          fourStarRating: '',
-          fiveStarRating: '',
-          largeImageURL: 'https://s.gr-assets.com/assets/nophoto/book/111x148-bcc042a9c91a29c1d680899eff700a03.png',
-          smallImageURL: 'https://s.gr-assets.com/assets/nophoto/book/50x75-a91bf249278a81aabab721ef782c4a74.png',
-          largeImageURL: 'https://s.gr-assets.com/assets/nophoto/book/111x148-bcc042a9c91a29c1d680899eff700a03.png',
-          smallImageURL: 'https://s.gr-assets.com/assets/nophoto/book/50x75-a91bf249278a81aabab721ef782c4a74.png',
+           isbn13: '',
+           authors: '',
+           publicationYear: '',
+           originalTitle: '',
+           title: '',
+           totalRatingCount: '',
+           averageRating: '',
+           oneStarRating: '',
+           twoStarRating: '',
+           threeStarRating: '',
+           fourStarRating: '',
+           fiveStarRating: '',
+           largeImage: 'https://s.gr-assets.com/assets/nophoto/book/111x148-bcc042a9c91a29c1d680899eff700a03.png',
+           smallImage: 'https://s.gr-assets.com/assets/nophoto/book/50x75-a91bf249278a81aabab721ef782c4a74.png',
           submit: null
         }}
         validationSchema={Yup.object().shape({
-          isbn13: Yup.string().required('ISBN is required'),
-          authors: Yup.string().required('Authors are required'),
-          publicationYear: Yup.number().required('Publication Year is required'),
-          originalTitle: Yup.string().required('Original Title is required'),
-          title: Yup.string().required('Title is required'),
-          totalRatingCount: Yup.number().required('Total Rating Count is required'),
-          averageRating: Yup.number().required('Average Rating is required'),
-          oneStarRating: Yup.number().required('1 Star Rating Count is required'),
-          twoStarRating: Yup.number().required('2 Star Rating Count is required'),
-          threeStarRating: Yup.number().required('3 Star Rating Count is required'),
-          fourStarRating: Yup.number().required('4 Star Rating Count is required'),
-          fiveStarRating: Yup.number().required('5 Star Rating Count is required'),
-          largeImageUrl: Yup.string().url('Invalid URL').required('Large Image URL is required'),
-          smallImageUrl: Yup.string().url('Invalid URL').required('Small Image URL is required')
+           isbn13: Yup.string().required('ISBN is required'),
+           authors: Yup.string().required('Authors are required'),
+           publicationYear: Yup.number().required('Publication Year is required'),
+           originalTitle: Yup.string().required('Original Title is required'),
+           title: Yup.string().required('Title is required'),
+           totalRatingCount: Yup.number().required('Total Rating Count is required'),
+           averageRating: Yup.number().required('Average Rating is required'),
+           oneStarRating: Yup.number().required('1 Star Rating Count is required'),
+           twoStarRating: Yup.number().required('2 Star Rating Count is required'),
+           threeStarRating: Yup.number().required('3 Star Rating Count is required'),
+           fourStarRating: Yup.number().required('4 Star Rating Count is required'),
+           fiveStarRating: Yup.number().required('5 Star Rating Count is required'),
+           largeImage: Yup.string().url('Invalid URL').required('Large Image URL is required'),
+           smallImage: Yup.string().url('Invalid URL').required('Small Image URL is required')
         })}
         onSubmit={(values, { setErrors, setSubmitting, resetForm }) => {
-          console.dir(values);
+          console.dir("I submitted");
 
           axios
             .post('/books', {
@@ -81,8 +80,8 @@ export default function CreateBookForm({ onSuccess, onError }: { onSuccess: () =
                   rating5: values.fiveStarRating
                 },
                 icons: {
-                  large: values.largeImageURL,
-                  small: values.smallImageURL
+                  large: values.largeImage,
+                  small: values.smallImage
                 }
               }
             })
@@ -102,10 +101,8 @@ export default function CreateBookForm({ onSuccess, onError }: { onSuccess: () =
                   threeStarRating: '',
                   fourStarRating: '',
                   fiveStarRating: '',
-                  largeImageURL: 'https://s.gr-assets.com/assets/nophoto/book/111x148-bcc042a9c91a29c1d680899eff700a03.png',
-                  smallImageURL: 'https://s.gr-assets.com/assets/nophoto/book/50x75-a91bf249278a81aabab721ef782c4a74.png',
-                  largeImageURL: 'https://s.gr-assets.com/assets/nophoto/book/111x148-bcc042a9c91a29c1d680899eff700a03.png',
-                  smallImageURL: 'https://s.gr-assets.com/assets/nophoto/book/50x75-a91bf249278a81aabab721ef782c4a74.png',
+                  largeImage: 'https://s.gr-assets.com/assets/nophoto/book/111x148-bcc042a9c91a29c1d680899eff700a03.png',
+                  smallImage: 'https://s.gr-assets.com/assets/nophoto/book/50x75-a91bf249278a81aabab721ef782c4a74.png',
                   submit: null
                 }
               });
@@ -143,7 +140,7 @@ export default function CreateBookForm({ onSuccess, onError }: { onSuccess: () =
                   </FormHelperText>
                 )}
               </Grid>
-              <Grid item xs={12}>
+               <Grid item xs={12}>
                 <Stack spacing={1}>
                   <InputLabel htmlFor="authors">Book&apos;s Authors</InputLabel>
                   <OutlinedInput
@@ -376,46 +373,45 @@ export default function CreateBookForm({ onSuccess, onError }: { onSuccess: () =
               </Grid>
               <Grid item xs={12}>
                 <Stack spacing={1}>
-                  <InputLabel htmlFor="largeImageURL">Large Image URL</InputLabel>
+                  <InputLabel htmlFor="largeImage">Large Image URL</InputLabel>
                   <OutlinedInput
-                    id="largeImageURL"
+                    id="largeImage"
                     type="string"
-                    value={values.largeImageURL}
-                    name="largeImageURL"
+                    value={values.largeImage}
+                    name="largeImage"
                     onBlur={handleBlur}
                     onChange={handleChange}
                     fullWidth
-                    error={Boolean(touched.largeImageURL && errors.largeImageURL)}
+                    error={Boolean(touched.largeImage && errors.largeImage)}
                   />
                 </Stack>
-                {touched.largeImageURL && errors.largeImageURL && (
-                  <FormHelperText error id="standard-weight-helper-text-largeImageURL-message-send">
-                    {errors.largeImageURL}
+                {touched.largeImage && errors.largeImage && (
+                  <FormHelperText error id="standard-weight-helper-text-largeImage-message-send">
+                    {errors.largeImage}
                   </FormHelperText>
                 )}
               </Grid>
               <Grid item xs={12}>
                 <Stack spacing={1}>
-                  <InputLabel htmlFor="smallImageURL">Small Image URL</InputLabel>
+                  <InputLabel htmlFor="smallImage">Small Image URL</InputLabel>
                   <OutlinedInput
-                    id="smallImageURL"
+                    id="smallImage"
                     type="string"
-                    value={values.smallImageURL}
-                    name="smallImageURL"
+                    value={values.smallImage}
+                    name="smallImage"
                     onBlur={handleBlur}
                     onChange={handleChange}
                     fullWidth
-                    error={Boolean(touched.smallImageURL && errors.smallImageURL)}
+                    error={Boolean(touched.smallImage && errors.smallImage)}
                   />
                 </Stack>
-                {touched.smallImageURL && errors.smallImageURL && (
-                  <FormHelperText error id="standard-weight-helper-text-smallImageURL-message-send">
-                    {errors.smallImageURL}
+                {touched.smallImage && errors.smallImage && (
+                  <FormHelperText error id="standard-weight-helper-text-smallImageU-message-send">
+                    {errors.smallImage}
                   </FormHelperText>
                 )}
               </Grid>
-
-              {errors.submit && (
+               {errors.submit && (
                 <Grid item xs={12}>
                   <FormHelperText error>{errors.submit}</FormHelperText>
                 </Grid>
