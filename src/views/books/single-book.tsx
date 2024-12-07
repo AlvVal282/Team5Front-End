@@ -210,10 +210,16 @@ export default function SingleBookPage() {
                       {book.title}
                     </Typography>
                     <Typography variant="subtitle1" gutterBottom>
+                      <strong>Original Title:</strong> {book.original_title || 'N/A'}
+                    </Typography>
+                    <Typography variant="subtitle1" gutterBottom>
                       <strong>Authors:</strong> {book.authors}
                     </Typography>
                     <Typography variant="subtitle1" gutterBottom>
                       <strong>Publication Year:</strong> {book.publication}
+                    </Typography>
+                    <Typography variant="subtitle1" gutterBottom>
+                      <strong>ISBN:</strong> {isbn}
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
                       <Typography variant="body1" sx={{ mr: 1 }}>
