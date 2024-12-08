@@ -1,6 +1,6 @@
 "use client";
-import Search from 'sections/books/book-forms/retrieveForm';
+import RetrieveBooksPage from 'views/books/retrieve'
 
 export default function SearchPage()  {
-  return < Search />;
+  return <RetrieveBooksPage/>;
 };
