@@ -20,8 +20,8 @@ import { Formik } from 'formik';
 import AnimateButton from 'components/@extended/AnimateButton';
 
 import axios from 'utils/axios';
-import router from 'next/router';
-import { width } from '@mui/system';
+//import { width } from '@mui/system';
+import { useRouter } from 'next/router';
 
 interface IRetrieveBooksProps {
   priority: number;
@@ -49,6 +49,12 @@ export default function RetrieveBooksPage({
   const [limit, setLimit] = useState<number>(16); // Default limit
   const [offset, setOffset] = useState<number>(0); // Default offset
   const [totalRecords, setTotalRecords] = useState<number>(9415);
+  const router = useRouter();
+
+  const handleMoreDetail = (isbn: string) => {
+    // Move the navigation logic to a function
+    router.push(`/books/single-book/${isbn}`);
+  };
 
   useEffect(() => {
     setShowRetrievedBooks(false);
@@ -257,7 +263,7 @@ export default function RetrieveBooksPage({
                         <Button
                         variant="outlined"
                         color="primary"
-                        onClick={() => router.push(`/books/single-page/${book.isbn}`)}
+                        onClick={() => handleMoreDetail(book.isbn)}
                         >
                         More Detail
                       </Button>
