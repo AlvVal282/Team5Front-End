@@ -7,10 +7,19 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { CircularProgress, Card, CardContent, Grid, Rating, Button, TextField, Alert } from '@mui/material';
+import {
+  CircularProgress,
+  Card,
+  CardContent,
+  Grid,
+  Rating,
+  Button,
+  TextField,
+  Alert,
+} from '@mui/material';
 import { BookCover } from 'book-cover-3d';
-import { DefaultBookImage } from 'components/DefaultBookImage';
 import LibraryBooksIcon from '@mui/icons-material/ImportContacts';
+import { useParams } from 'next/navigation'; // Correct hook for App Router
 import axios from 'utils/axios';
 
 const defaultTheme = createTheme();
@@ -28,15 +37,15 @@ const EMPTY_ALERT: IAlert = {
 };
 
 export default function SingleBookPage() {
+  const { isbn } = useParams(); // Get the dynamic ISBN from the route
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
   const [newRating, setNewRating] = useState(5);
   const [alert, setAlert] = useState<IAlert>(EMPTY_ALERT);
-  const [trigger, setTrigger] = useState(0); 
-
-  const isbn = '9780349113910'; 
+  const [trigger, setTrigger] = useState(0); // Re-fetch trigger for ratings update
 
   useEffect(() => {
+    setLoading(true);
     axios
       .get(`/books/isbns/${isbn}`)
       .then((response) => {
@@ -47,7 +56,7 @@ export default function SingleBookPage() {
         console.error('Error fetching book details:', error);
         setLoading(false);
       });
-  }, [isbn, trigger]); // Trigger refetch on `trigger` change
+  }, [isbn, trigger]); // Re-fetch when ISBN or trigger changes
 
   const handleUpdateRating = () => {
     if (newRating < 1 || newRating > 5) {
@@ -69,8 +78,8 @@ export default function SingleBookPage() {
       rating5: book.ratings.rating_5,
     };
 
-    updatedRatings.count += 1; 
-    updatedRatings[`rating${newRating}`] += 1; 
+    updatedRatings.count += 1;
+    updatedRatings[`rating${newRating}`] += 1;
 
     const totalStars =
       updatedRatings.rating1 * 1 +
@@ -89,28 +98,16 @@ export default function SingleBookPage() {
           alertMessage: 'Rating updated successfully!',
           alertSeverity: 'success',
         });
-        setTrigger((prevTrigger) => prevTrigger + 1);
+        setTrigger((prevTrigger) => prevTrigger + 1); // Trigger a re-fetch
       })
       .catch((error) => {
-        if (error.response) {
-          setAlert({
-            showAlert: true,
-            alertMessage: error.response.data.message || 'Failed to update the rating.',
-            alertSeverity: 'error',
-          });
-        } else if (error.request) {
-          setAlert({
-            showAlert: true,
-            alertMessage: 'No response received from the server.',
-            alertSeverity: 'error',
-          });
-        } else {
-          setAlert({
-            showAlert: true,
-            alertMessage: 'An error occurred while updating the rating.',
-            alertSeverity: 'error',
-          });
-        }
+        const errorMessage =
+          error.response?.data?.message || 'Failed to update the rating.';
+        setAlert({
+          showAlert: true,
+          alertMessage: errorMessage,
+          alertSeverity: 'error',
+        });
       });
   };
 
@@ -172,7 +169,6 @@ export default function SingleBookPage() {
                   pagesOffset={5}
                 >
                   {book.icons.large ? (
-                    // If an image is available, display the image
                     <img
                       src={book.icons.large}
                       alt={book.title || 'Book Cover'}
@@ -183,21 +179,20 @@ export default function SingleBookPage() {
                       }}
                     />
                   ) : (
-                    // If no image, display the fallback with title or placeholder text
                     <Box
-                    sx={{
-                      width: 200,
-                      height: 300,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      backgroundColor: '#e0e0e0',
-                      color: '#9e9e9e',
-                      borderRadius: 2,
-                    }}
-                  >
-                    <LibraryBooksIcon sx={{ fontSize: 80 }} />
-                  </Box>
+                      sx={{
+                        width: 200,
+                        height: 300,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: '#e0e0e0',
+                        color: '#9e9e9e',
+                        borderRadius: 2,
+                      }}
+                    >
+                      <LibraryBooksIcon sx={{ fontSize: 80 }} />
+                    </Box>
                   )}
                 </BookCover>
               </Grid>
@@ -225,7 +220,11 @@ export default function SingleBookPage() {
                       <Typography variant="body1" sx={{ mr: 1 }}>
                         <strong>{book.ratings.average.toFixed(1)}</strong>
                       </Typography>
-                      <Rating value={book.ratings.average} precision={0.1} readOnly />
+                      <Rating
+                        value={book.ratings.average}
+                        precision={0.1}
+                        readOnly
+                      />
                       <Typography variant="body2" sx={{ ml: 1 }}>
                         ({book.ratings.count} ratings)
                       </Typography>
