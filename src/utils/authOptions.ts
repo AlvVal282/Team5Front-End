@@ -1,7 +1,6 @@
 // next
 import type { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-
 // project import
 import axios from 'utils/axios';
 
@@ -70,7 +69,7 @@ export const authOptions: NextAuthOptions = {
       name: 'reset-password',
       credentials: {
         username: { name: 'username', label: 'Username', type: 'text', placeholder: 'Enter Username' },
-        oldPassword: { name: 'olPassword', label: 'Old-Password', type: 'password', placeholder: 'Enter Password' },
+        oldPassword: { name: 'oldPassword', label: 'Old-Password', type: 'password', placeholder: 'Enter Password' },
         newPassword: { name: 'newPassword', label: 'New-Password', type: 'password', placeholder: 'Enter New Password' },
       },
       async authorize(credentials) {

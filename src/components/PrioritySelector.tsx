@@ -12,7 +12,7 @@ export default function PrioritySelector({
   return (
     <Stack direction="row" spacing={2} justifyContent="center">
       <ToggleButtonGroup exclusive value={initialValue} onChange={onClick}>
-        <ToggleButton value={1}>
+        <ToggleButton value={1} sx={{ width: 140}}>
           <PriorityAvatar priority={1} />
         </ToggleButton>
         <ToggleButton value={2}>

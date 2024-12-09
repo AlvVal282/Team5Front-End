@@ -103,7 +103,7 @@ export default function AuthResetPassword() {
                 setSuccessMessage('Your password has been successfully changed!');
                 setSubmitting(false);
                 setTimeout(() => {
-                  router.push('/sample-page');
+                  router.push('/home-page');
                 }, 2000);
               }
             },

@@ -8,7 +8,6 @@ import {
   Typography,
   Avatar,
   Alert,
-  SelectChangeEvent,
   Grid,
 } from '@mui/material';
 import BookIcon from '@mui/icons-material/Book';
@@ -16,7 +15,7 @@ import { grey } from '@mui/material/colors';
 
 // Project imports
 import PrioritySelector from 'components/PrioritySelectors';
-import RetrieveBooksPage from 'sections/books/book-forms/bookForm'
+import RetrieveBooksPage from 'sections/books/book-forms/bookForm';
 
 interface IAlert {
   showAlert: boolean;
@@ -34,11 +33,11 @@ export default function RetrieveBooks() {
   const [selectedOption, setSelectedOption] = useState(0);
   const [alert, setAlert] = useState(EMPTY_ALERT);
 
-  // Handle the priority change with the correct type
-  const handlePriorityChange = (event: SelectChangeEvent<number>) => {
+  // Handle the priority change
+  const handlePriorityChange = (event: any) => {
     const newPriority = Number(event.target.value);
     setSelectedOption(newPriority);
-    setAlert(EMPTY_ALERT); // Clear any existing alerts
+    setAlert(EMPTY_ALERT); // Clear alerts when priority changes
   };
 
   const onSuccess = () => {
@@ -52,7 +51,7 @@ export default function RetrieveBooks() {
   const onError = (message: string) => {
     setAlert({
       showAlert: true,
-      alertMessage: 'Error retrieving books: ' + message,
+      alertMessage: `Error retrieving books: ${message}`,
       alertSeverity: 'error',
     });
   };

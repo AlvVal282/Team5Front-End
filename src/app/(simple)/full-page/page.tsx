@@ -1,7 +1,7 @@
-import SamplePage from 'views/sample-page';
+import HomePage from 'views/home-page';
 
 // ==============================|| PAGE ||============================== //
 
-export default function ContactUSPage() {
-  return <SamplePage />;
+export default function HomeContactPage() {
+  return <HomePage />;
 }

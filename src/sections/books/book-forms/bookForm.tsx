@@ -24,6 +24,7 @@ import axios from 'utils/axios';
 //import { width } from '@mui/system';
 //import { useRouter } from 'next/router';
 
+
 interface IRetrieveBooksProps {
   priority: number;
   onSuccess: () => void;
@@ -39,11 +40,11 @@ interface IRetrievedBook {
   coverImage: string;
   publication: number;
 }
- 
+
 export default function RetrieveBooksPage({
   priority,
   onSuccess,
-  onError
+  onError,
 }: IRetrieveBooksProps) {
   const [retrievedBooks, setRetrievedBooks] = useState<IRetrievedBook[]>([]);
   const [showRetrievedBooks, setShowRetrievedBooks] = useState<boolean>(false);
@@ -126,9 +127,8 @@ export default function RetrieveBooksPage({
       .required("Maximum rating is required"),
   });
   
-  //const totalPages = Math.ceil(totalRecords / limit);
   return (
-    <>
+    <div>
       <Formik
         initialValues={{
           value: '',
@@ -199,32 +199,23 @@ export default function RetrieveBooksPage({
               }
 
               const retrievedBookDetails = results.map((book: any) => ({
+       
                 isbn: book.isbn13 || 'N/A',
-                title: book.title || 'Unknown Title',
-                authors: book.authors || 'Unknown Author(s)',
-                averageRating: book.ratings?.average || 'No Rating',
+                title: book.title || 'Untitled',
+                authors: book.authors || 'Unknown Authors',
+                averageRating: book.ratings?.average || '0',
                 ratingCount: book.ratings?.count || 0,
                 coverImage: book.icons?.small || '',
-                publication: book.publication || 'Unknown Year'
-              }));
-
-              if (retrievedBookDetails.length > 0) {
-                setShowRetrievedBooks(true);
-                setRetrievedBooks(retrievedBookDetails);
-                onSuccess();
-              } else {
-                setShowRetrievedBooks(false);
-                setRetrievedBooks([]);
-                onError('No books were found.');
-              }
+                publication: book.publication || 'N/A',
+              })));
+              setShowRetrievedBooks(true);
+              onSuccess();
+              resetForm();
+              setSubmitting(false);
             })
             .catch((error) => {
-              console.error(error);
-              const errorMessage = error.response ? error.response.data : error.message;
-              setErrors({ value: errorMessage });
+              onError(error.message || 'Error fetching books');
               setSubmitting(false);
-              onError(errorMessage);
-              setShowRetrievedBooks(false);
             });
         }}
       >
@@ -433,5 +424,6 @@ export default function RetrieveBooksPage({
         
       )} 
     </>
+    
   );
 }
