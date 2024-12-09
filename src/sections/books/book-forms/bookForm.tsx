@@ -10,7 +10,8 @@ import Grid from '@mui/material/Grid';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { Card, CardContent, Rating, Box } from '@mui/material';
+import { Card, CardContent, Rating, Box, TextField } from '@mui/material';
+
 
 // third party
 import * as Yup from 'yup';
@@ -21,7 +22,7 @@ import AnimateButton from 'components/@extended/AnimateButton';
 
 import axios from 'utils/axios';
 //import { width } from '@mui/system';
-import { useRouter } from 'next/router';
+//import { useRouter } from 'next/router';
 
 interface IRetrieveBooksProps {
   priority: number;
@@ -49,17 +50,22 @@ export default function RetrieveBooksPage({
   const [limit, setLimit] = useState<number>(16); // Default limit
   const [offset, setOffset] = useState<number>(0); // Default offset
   const [totalRecords, setTotalRecords] = useState<number>(9415);
+  const [nextPageOffset, setNextPageOffset] = useState<number | null>(null); // Next page offset
   const router = useRouter();
 
   const handleMoreDetail = (isbn: string) => {
-    // Move the navigation logic to a function
+     //Move the navigation logic to a function
     router.push(`/books/single-book/${isbn}`);
   };
+
+ // Optional: Add input fields for limit and offset
+ 
+  
 
   useEffect(() => {
     setShowRetrievedBooks(false);
     setRetrievedBooks([]);
-  }, [priority, offset]);
+  }, [priority]);
 
   const placeholderText = [
     "Enter ISBN Number", 
@@ -74,27 +80,77 @@ export default function RetrieveBooksPage({
     "Book Title", 
     "Rating", 
     "All Books"
-  ];
+  ]; 
+  const handleNextPage = (submitForm: any) => {
+    if (nextPageOffset !== null) {
+      setOffset(nextPageOffset); // Use nextPage from the backend
+    }
+    submitForm();
+  };
+
+  const handlePreviousPage = (submitForm: any) => {
+    setOffset((prevOffset) => Math.max(0, prevOffset - limit));
+    submitForm();
+  };
 
   const validationString = Yup.object().shape({
-    value: Yup.string().max(255).required(() => `${labelText[priority - 1]} value is required`),
+    value: Yup.string()
+      .max(255, "Maximum length is 255 characters")
+      .required(() => `${labelText[priority - 1]} value is required`),
   });
   
   const validationNumber = Yup.object().shape({
-    value: Yup.string().max(255).matches(/^\d+$/, "ISBN value must be a number").required(() => `${labelText[priority - 1]} value is required`),
+    value: Yup.string()
+      .max(255, "Maximum length is 255 characters")
+      .matches(/^\d+$/, "ISBN value must be a number")
+      .required(() => `${labelText[priority - 1]} value is required`),
   });
+  
+  const validationPriority5 = Yup.object().shape({
+    limit: Yup.number()
+      .min(1, "Limit must be at least 1")
+      .required("Limit is required"),
+    offset: Yup.number()
+      .min(0, "Offset cannot be negative")
+      .required("Offset is required"),
+  });
+  // Validation schema for rating search
+  const validationRatingSearch = Yup.object().shape({
+    min: Yup.number()
+      .min(1, "Minimum rating must be between 1 and 5")
+      .max(5, "Minimum rating must be between 1 and 5")
+      .required("Minimum rating is required"),
+    max: Yup.number()
+      .min(1, "Maximum rating must be between 1 and 5")
+      .max(5, "Maximum rating must be between 1 and 5")
+      .required("Maximum rating is required"),
+  });
+  
   //const totalPages = Math.ceil(totalRecords / limit);
   return (
     <>
       <Formik
         initialValues={{
           value: '',
-          submit: null
+          submit: null,
+          limit: '',
+          offset: '',
+          min: '',
+          max: '',
+          order: ''
         }}
-        validationSchema={priority === 1 ? validationNumber : validationString}
+        
+        validationSchema={priority === 1
+          ? validationNumber
+          : priority === 5
+          ? validationPriority5
+          : priority === 4 
+          ? validationRatingSearch
+          : validationString
+        }
         onSubmit={(values, { setErrors, setSubmitting, resetForm }) => {
           let apiEndpoint = '';
-          let params: any = {};
+          
           switch (priority) {
             case 1:
               apiEndpoint = `/books/isbns/${values.value}`;
@@ -106,37 +162,38 @@ export default function RetrieveBooksPage({
               apiEndpoint = `/books/title/${values.value}`;
               break;
             case 4:
-              apiEndpoint = `/books/rating/${values.value}`;
+              apiEndpoint = `/books/rating`;
               break;
             case 5:
               apiEndpoint = '/books/pagination/offset';
-              params = {limit, offset };
+              
               break;
             default:
               onError('Invalid search type');
               setSubmitting(false);
               return;
           }
-          const request = priority === 5 
-          ? axios.get(apiEndpoint, { params: { limit, offset } }) 
+          const endpoint = priority === 5 
+          ? axios.post(apiEndpoint, { limit: values.limit  , offset: values.offset  })
+          : priority === 4 
+          ? axios.post(apiEndpoint, { min: values.min, max: values.max, order: values.order }) 
           : axios.get(apiEndpoint);
             
-          request
+          endpoint
             //get(apiEndpoint)
             .then((response) => {
+              //console.log('Request body:', body);
+              //console.log('API Response:', response.data);
               setSubmitting(false);
-              resetForm({
-                values: {
-                  value: '',
-                  submit: null
-                }
-              });
-
+              
+              
               let results = [];
               if (priority === 5) {
+                
                 results = response.data.results || [];
                 const pagination = response.data.pagination || {};
                 setTotalRecords(pagination.totalRecords || 0);
+                setNextPageOffset(pagination.nextPage || null); // Update the nextPage offset
               } else {
                 results = response.data.result ? [response.data.result] : response.data.results || [];
               }
@@ -173,7 +230,88 @@ export default function RetrieveBooksPage({
       >
         {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
         <form noValidate onSubmit={handleSubmit} style={{ display: 'flex', gap: '18px' }}>
-          {priority !== 5 && (
+            {priority === 4 && (
+              <Stack spacing={2} sx={{ width: '100%' }}>
+                <Stack direction="row" spacing={2}>
+                  <TextField
+                    label="Min Rating"
+                    type="number"
+                    name="min"
+                    value={values.min}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    InputProps={{ inputProps: { min: 1, max: 5 } }}
+                    error={Boolean(touched.min && errors.min)}
+                    helperText={touched.min && errors.min ? errors.min : ''}
+                    fullWidth
+                  />
+                  <TextField
+                    label="Max Rating"
+                    type="number"
+                    name="max"
+                    value={values.max}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    InputProps={{ inputProps: { min: 1, max: 5 } }}
+                    error={Boolean(touched.max && errors.max)}
+                    helperText={touched.max && errors.max ? errors.max : ''}
+                    fullWidth
+                  />
+                </Stack>
+                  <TextField
+                    select
+                    label="Order"
+                    name="order"
+                    value={values.order}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={Boolean(touched.order && errors.order)}
+                    helperText={touched.order && errors.order ? errors.order : ''}
+                    SelectProps={{
+                      native: true,
+                    }}
+                    fullWidth
+                  >
+                    <option value="" disabled>
+                      Select Order
+                    </option>
+                    <option value="min-first">Min-First</option>
+                    <option value="max-first">Max-First</option>
+                  </TextField>
+                </Stack>
+              )}
+
+            {/* Custom logic for priority 5 */}
+            {priority === 5 && (
+              <Stack direction="row" spacing={2}>
+                <TextField
+                  label="Limit"
+                  type="number"
+                  name='limit'
+                  value={values.limit}
+                  //onChange={handleChange}
+                  onChange={(e) => {
+                    const newLimit = Math.max(1, parseInt(e.target.value, 10) || 1);
+                    setLimit(newLimit); // Update limit
+                  }}
+                  InputProps={{ inputProps: { min: 1 } }}
+                />
+                <TextField
+                  label="Offset"
+                  type="number"
+                  name='offset'
+                  value={values.offset}
+                  //onChange={handleChange}
+                  onChange={(e) => {
+                    const newOffset = Math.max(0, parseInt(e.target.value, 10) || 0);
+                    setOffset(newOffset); // Update offset
+                    handleChange(e); // Update formik value
+                  }}
+                  InputProps={{ inputProps: { min: 0 } }}
+                />
+              </Stack>
+            )}
+          {priority !== 5 && priority !==4 &&(
             <Stack spacing={1} sx={{ flex: 1 }}>
               <OutlinedInput
                 id="book-name"
@@ -201,12 +339,29 @@ export default function RetrieveBooksPage({
               type="submit" 
               variant="contained" 
               color="primary"
-              disabled={priority !== 5 && !values.value.trim()}
+              //disabled={!values.value.trim()} 
               sx={{ height: '42px' }} // Match the height of the input field
             >
               {priority === 5 ? 'RETRIEVE ALL BOOKS' : 'RETRIEVE'}
             </Button>
           </AnimateButton>
+          {priority === 5 && (
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, height: '42px'}}>
+                <Button
+                  onClick={() => handlePreviousPage(handleSubmit)}
+                  disabled={offset === 0} 
+                >
+                  Previous Page
+                </Button>
+                <Button
+                  onClick={() => handleNextPage(handleSubmit)}
+                  disabled={nextPageOffset === null || nextPageOffset >= totalRecords}
+                
+                >
+                  Next Page
+                </Button>
+              </Box>
+            )}
         </form>
       )}
     </Formik>
@@ -276,8 +431,7 @@ export default function RetrieveBooksPage({
           </Box>
         </Grid>
         
-      )}
-          
+      )} 
     </>
   );
 }
