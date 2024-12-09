@@ -1,19 +1,28 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation'; // Correct import for App Router
-import {
-  Button,
-  Card,
-  CardContent,
-  Grid,
-  Typography,
-  Box,
-  Rating,
-} from '@mui/material';
-import axios from 'utils/axios';
-import { Formik } from 'formik';
+
+// material-ui
+import Button from '@mui/material/Button';
+import FormHelperText from '@mui/material/FormHelperText';
+import Grid from '@mui/material/Grid';
+//import InputLabel from '@mui/material/InputLabel';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import { Card, CardContent, Rating, Box, TextField } from '@mui/material';
+
+
+// third party
 import * as Yup from 'yup';
+import { Formik } from 'formik';
+
+// project import
+import AnimateButton from 'components/@extended/AnimateButton';
+
+import axios from 'utils/axios';
+//import { width } from '@mui/system';
+//import { useRouter } from 'next/router';
 
 interface IRetrieveBooksProps {
   priority: number;
@@ -30,18 +39,40 @@ interface IRetrievedBook {
   coverImage: string;
   publication: number;
 }
-
+ 
 export default function RetrieveBooksPage({
   priority,
   onSuccess,
-  onError,
+  onError
 }: IRetrieveBooksProps) {
   const [retrievedBooks, setRetrievedBooks] = useState<IRetrievedBook[]>([]);
   const [showRetrievedBooks, setShowRetrievedBooks] = useState<boolean>(false);
-  const router = useRouter(); // Use next/navigation for App Router
+  const [limit, setLimit] = useState<number>(16); // Default limit
+  const [offset, setOffset] = useState<number>(0); // Default offset
+  const [totalRecords, setTotalRecords] = useState<number>(9415);
+  //const router = useRouter();
 
-  const handleMoreDetail = (isbn: string) => {
-    router.push(`/books/${isbn}`); // Navigate to the single book page
+  //const handleMoreDetail = (isbn: string) => {
+    // Move the navigation logic to a function
+   //router.push(`/books/single-book/${isbn}`);
+ // };
+
+ // Optional: Add input fields for limit and offset
+ const handleLimitChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const newLimit = parseInt(event.target.value, 10);
+  setLimit(newLimit > 0 ? newLimit : 16);
+  };
+  const handleOffsetChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newOffset = parseInt(event.target.value, 10);
+    setOffset(newOffset >= 0 ? newOffset : 0);
+  };
+  // Optional: Add pagination controls
+  const handleNextPage = () => {
+    setOffset(prevOffset => prevOffset + limit);
+  };
+
+  const handlePreviousPage = () => {
+    setOffset(prevOffset => Math.max(0, prevOffset - limit));
   };
 
   useEffect(() => {
@@ -49,106 +80,260 @@ export default function RetrieveBooksPage({
     setRetrievedBooks([]);
   }, [priority]);
 
-  const validationSchema = priority === 1
-    ? Yup.object().shape({
-        value: Yup.string()
-          .max(255)
-          .matches(/^\d+$/, 'ISBN value must be a number')
-          .required('ISBN is required'),
-      })
-    : Yup.object().shape({
-        value: Yup.string()
-          .max(255)
-          .required('Value is required'),
-      });
+  const placeholderText = [
+    "Enter ISBN Number", 
+    "Enter Author's Name", 
+    "Enter Book Title", 
+    "Enter Rating", 
+    "Retrieve All Books"
+  ];
+  const labelText = [
+    "ISBN Number", 
+    "Author's Name", 
+    "Book Title", 
+    "Rating", 
+    "All Books"
+  ];
 
+  const validationString = Yup.object().shape({
+    value: Yup.string().max(255).required(() => `${labelText[priority - 1]} value is required`),
+  });
+  
+  const validationNumber = Yup.object().shape({
+    value: Yup.string().max(255).matches(/^\d+$/, "ISBN value must be a number").required(() => `${labelText[priority - 1]} value is required`),
+  });
+  //const totalPages = Math.ceil(totalRecords / limit);
   return (
-    <div>
+    <>
       <Formik
-        initialValues={{ value: '', submit: null }}
-        validationSchema={validationSchema}
-        onSubmit={(values, { setSubmitting, resetForm }) => {
-          const apiEndpoint =
-            priority === 1
-              ? `/books/isbns/${values.value}`
-              : priority === 2
-              ? `/books/author/${values.value}`
-              : priority === 3
-              ? `/books/title/${values.value}`
-              : priority === 4
-              ? `/books/rating/${values.value}`
-              : '/books/pagination/offset';
-
-          axios
-            .get(apiEndpoint)
+        initialValues={{
+          value: '',
+          submit: null
+        }}
+        validationSchema={priority === 1 ? validationNumber : validationString}
+        onSubmit={(values, { setErrors, setSubmitting, resetForm }) => {
+          let apiEndpoint = '';
+          let body: any = {};
+          switch (priority) {
+            case 1:
+              apiEndpoint = `/books/isbns/${values.value}`;
+              break;
+            case 2:
+              apiEndpoint = `/books/author/${values.value}`;
+              break;
+            case 3:
+              apiEndpoint = `/books/title/${values.value}`;
+              break;
+            case 4:
+              apiEndpoint = `/books/rating/${values.value}`;
+              break;
+            case 5:
+              apiEndpoint = '/books/pagination/offset';
+              body = { limit, offset }
+              console.log('Request body:', body);
+              break;
+            default:
+              onError('Invalid search type');
+              setSubmitting(false);
+              return;
+          }
+          const endpoint = priority === 5 
+          ? axios.post(apiEndpoint, body) 
+          : axios.get(apiEndpoint);
+            
+          endpoint
+            //get(apiEndpoint)
             .then((response) => {
-              const results =
-                response.data.results || [response.data.result];
-              setRetrievedBooks(results.map((book: any) => ({
+              //console.log('Request body:', body);
+              console.log('API Response:', response.data);
+              setSubmitting(false);
+              resetForm({
+                values: {
+                  value: '',
+                  submit: null
+                }
+              });
+              
+              let results = [];
+              if (priority === 5) {
+                
+                results = response.data.results || [];
+                const pagination = response.data.pagination || {};
+                setTotalRecords(pagination.totalRecords || 0);
+              } else {
+                results = response.data.result ? [response.data.result] : response.data.results || [];
+              }
+
+              const retrievedBookDetails = results.map((book: any) => ({
                 isbn: book.isbn13 || 'N/A',
-                title: book.title || 'Untitled',
-                authors: book.authors || 'Unknown Authors',
-                averageRating: book.ratings?.average || '0',
+                title: book.title || 'Unknown Title',
+                authors: book.authors || 'Unknown Author(s)',
+                averageRating: book.ratings?.average || 'No Rating',
                 ratingCount: book.ratings?.count || 0,
                 coverImage: book.icons?.small || '',
-                publication: book.publication || 'N/A',
-              })));
-              setShowRetrievedBooks(true);
-              onSuccess();
-              resetForm();
-              setSubmitting(false);
+                publication: book.publication || 'Unknown Year'
+              }));
+
+              if (retrievedBookDetails.length > 0) {
+                setShowRetrievedBooks(true);
+                setRetrievedBooks(retrievedBookDetails);
+                onSuccess();
+              } else {
+                setShowRetrievedBooks(false);
+                setRetrievedBooks([]);
+                onError('No books were found.');
+              }
             })
             .catch((error) => {
-              onError(error.message || 'Error fetching books');
+              console.error(error);
+              const errorMessage = error.response ? error.response.data : error.message;
+              setErrors({ value: errorMessage });
               setSubmitting(false);
+              onError(errorMessage);
+              setShowRetrievedBooks(false);
             });
         }}
       >
-        {({ handleSubmit, values, handleChange }) => (
-          <form onSubmit={handleSubmit}>
-            <input
-              type="text"
-              name="value"
-              value={values.value}
-              onChange={handleChange}
-              placeholder="Search for books"
-            />
-            <button type="submit">Retrieve Books</button>
-          </form>
-        )}
-      </Formik>
-
-      {showRetrievedBooks && (
-        <Grid container spacing={2}>
-          {retrievedBooks.map((book) => (
-            <Grid item xs={12} sm={6} key={book.isbn}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h5">{book.title}</Typography>
-                  <Typography variant="body1">Author(s): {book.authors}</Typography>
-                  <Typography variant="body1">ISBN: {book.isbn}</Typography>
-                  <Typography variant="body1">Publication Year: {book.publication}</Typography>
-                  <Box display="flex" alignItems="center">
-                    <Rating
-                      value={Number(book.averageRating)}
-                      precision={0.1}
-                      readOnly
-                    />
-                    <Typography>{`(${book.ratingCount})`}</Typography>
-                  </Box>
-                  <Button
-                    onClick={() => handleMoreDetail(book.isbn)}
-                    variant="contained"
-                    color="primary"
-                  >
-                    More Detail
-                  </Button>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
+        {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
+        <form noValidate onSubmit={handleSubmit} style={{ display: 'flex', gap: '18px' }}>
+            {/* Custom logic for priority 5 */}
+            {priority === 5 && (
+              <Stack direction="row" spacing={2}>
+                <TextField
+                  label="Limit"
+                  type="number"
+                  value={limit}
+                  onChange={handleLimitChange}
+                  InputProps={{ inputProps: { min: 1 } }}
+                />
+                <TextField
+                  label="Offset"
+                  type="number"
+                  value={offset}
+                  onChange={handleOffsetChange}
+                  InputProps={{ inputProps: { min: 0 } }}
+                />
+              </Stack>
+            )}
+          {priority !== 5 && (
+            <Stack spacing={1} sx={{ flex: 1 }}>
+              <OutlinedInput
+                id="book-name"
+                type="text"
+                value={values.value}
+                name="value"
+                onBlur={handleBlur}
+                onChange={handleChange}
+                placeholder={placeholderText[priority - 1]}
+                fullWidth
+                error={Boolean(touched.value && errors.value)}
+                sx= {{ height: '42px'}}
+              />
+              {touched.value && errors.value && (
+                <FormHelperText error id="standard-weight-helper-text-name-message-send">
+                  {errors.value}
+                </FormHelperText>
+              )}
+            </Stack>
+          )}
+          <AnimateButton>
+            <Button 
+              disableElevation 
+              size="large" 
+              type="submit" 
+              variant="contained" 
+              color="primary"
+              //disabled={!values.value.trim()} 
+              sx={{ height: '42px' }} // Match the height of the input field
+            >
+              {priority === 5 ? 'RETRIEVE ALL BOOKS' : 'RETRIEVE'}
+            </Button>
+          </AnimateButton>
+        </form>
       )}
-    </div>
+    </Formik>
+      {showRetrievedBooks && retrievedBooks.length > 0 && (
+        <Grid item xs={15} sm='auto'>
+          <Typography variant="h4" gutterBottom>
+            Book(s) Retrieved:
+          </Typography>
+          <Box
+            sx={{
+              maxWidth: 900,
+              maxHeight: 500,
+              overflowY: 'auto',
+              paddingRight: 2,
+              width: '100%'
+            }}
+          >
+            {retrievedBooks.map((book, index) => (
+              <Grid sm='auto' container spacing={1} key={index} sx={{
+                marginTop: 1,
+                marginBottom: 4,
+                
+              }}>
+                
+                <Grid item xs={8} sm='auto'>
+                  <Card sx={{ display: 'flex', flexDirection: 'row', mb: 2 }}>
+                    <CardContent sx={{ flex: 1 }}>
+                      <Typography variant="h4" gutterBottom>
+                        {book.title || 'Untitled'}
+                      </Typography>
+                      <Typography variant="subtitle2" gutterBottom>
+                        Author(s): {book.authors || 'Unknown'}
+                      </Typography>
+                      <Typography variant="body1" gutterBottom>
+                        ISBN: {book.isbn}
+                      </Typography>
+                      <Typography variant="body1" gutterBottom>
+                        Publication Year: {book.publication || 'N/A'}
+                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+                        <Typography variant="body2" sx={{ mr: 1 }}>
+                          {parseFloat(book.averageRating).toFixed(1)}
+                        </Typography>
+                        <Rating
+                          value={parseFloat(book.averageRating)}
+                          precision={0.1}
+                          readOnly
+                        />
+                        <Typography variant="body2" sx={{ ml: 1 }}>
+                          {book.ratingCount || 0} ratings
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+                        <Button
+                        variant="outlined"
+                        color="primary"
+                        //onClick={() => handleMoreDetail(book.isbn)}
+                        >
+                        More Detail
+                      </Button>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              </Grid>
+            ))}
+          </Box>
+        </Grid>
+        
+      )}
+      {/* Pagination controls for priority 5 */}
+      {priority === 5 && (
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+          <Button onClick={handlePreviousPage} disabled={offset === 0}>
+            Previous Page
+          </Button>
+          <Button
+            onClick={handleNextPage}
+            disabled={offset + limit >= totalRecords}
+          >
+            Next Page
+          </Button>
+        </Box>
+      )}
+          
+    </>
   );
 }
