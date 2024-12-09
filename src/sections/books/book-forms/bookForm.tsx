@@ -6,7 +6,7 @@ import React, { useState, useEffect } from 'react';
 import Button from '@mui/material/Button';
 import FormHelperText from '@mui/material/FormHelperText';
 import Grid from '@mui/material/Grid';
-//import InputLabel from '@mui/material/InputLabel';
+import InputLabel from '@mui/material/InputLabel';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -21,9 +21,9 @@ import { Formik } from 'formik';
 import AnimateButton from 'components/@extended/AnimateButton';
 
 import axios from 'utils/axios';
-//import { width } from '@mui/system';
+import { width } from '@mui/system';
 //import { useRouter } from 'next/router';
-
+import { useRouter } from 'next/navigation';
 
 interface IRetrieveBooksProps {
   priority: number;
@@ -40,11 +40,11 @@ interface IRetrievedBook {
   coverImage: string;
   publication: number;
 }
-
+ 
 export default function RetrieveBooksPage({
   priority,
   onSuccess,
-  onError,
+  onError
 }: IRetrieveBooksProps) {
   const [retrievedBooks, setRetrievedBooks] = useState<IRetrievedBook[]>([]);
   const [showRetrievedBooks, setShowRetrievedBooks] = useState<boolean>(false);
@@ -52,11 +52,11 @@ export default function RetrieveBooksPage({
   const [offset, setOffset] = useState<number>(0); // Default offset
   const [totalRecords, setTotalRecords] = useState<number>(9415);
   const [nextPageOffset, setNextPageOffset] = useState<number | null>(null); // Next page offset
-  const router = useRouter();
+  const router = useRouter(); 
 
   const handleMoreDetail = (isbn: string) => {
      //Move the navigation logic to a function
-    router.push(`/books/single-book/${isbn}`);
+    router.push(`/books/${isbn}`);
   };
 
  // Optional: Add input fields for limit and offset
@@ -127,8 +127,9 @@ export default function RetrieveBooksPage({
       .required("Maximum rating is required"),
   });
   
+  //const totalPages = Math.ceil(totalRecords / limit);
   return (
-    <div>
+    <>
       <Formik
         initialValues={{
           value: '',
@@ -199,23 +200,32 @@ export default function RetrieveBooksPage({
               }
 
               const retrievedBookDetails = results.map((book: any) => ({
-       
                 isbn: book.isbn13 || 'N/A',
-                title: book.title || 'Untitled',
-                authors: book.authors || 'Unknown Authors',
-                averageRating: book.ratings?.average || '0',
+                title: book.title || 'Unknown Title',
+                authors: book.authors || 'Unknown Author(s)',
+                averageRating: book.ratings?.average || 'No Rating',
                 ratingCount: book.ratings?.count || 0,
                 coverImage: book.icons?.small || '',
-                publication: book.publication || 'N/A',
-              })));
-              setShowRetrievedBooks(true);
-              onSuccess();
-              resetForm();
-              setSubmitting(false);
+                publication: book.publication || 'Unknown Year'
+              }));
+
+              if (retrievedBookDetails.length > 0) {
+                setShowRetrievedBooks(true);
+                setRetrievedBooks(retrievedBookDetails);
+                onSuccess();
+              } else {
+                setShowRetrievedBooks(false);
+                setRetrievedBooks([]);
+                onError('No books were found.');
+              }
             })
             .catch((error) => {
-              onError(error.message || 'Error fetching books');
+              console.error(error);
+              const errorMessage = error.response ? error.response.data : error.message;
+              setErrors({ value: errorMessage });
               setSubmitting(false);
+              onError(errorMessage);
+              setShowRetrievedBooks(false);
             });
         }}
       >
@@ -273,35 +283,40 @@ export default function RetrieveBooksPage({
               )}
 
             {/* Custom logic for priority 5 */}
-            {priority === 5 && (
-              <Stack direction="row" spacing={2}>
-                <TextField
-                  label="Limit"
-                  type="number"
-                  name='limit'
-                  value={values.limit}
-                  //onChange={handleChange}
-                  onChange={(e) => {
-                    const newLimit = Math.max(1, parseInt(e.target.value, 10) || 1);
-                    setLimit(newLimit); // Update limit
-                  }}
-                  InputProps={{ inputProps: { min: 1 } }}
-                />
-                <TextField
-                  label="Offset"
-                  type="number"
-                  name='offset'
-                  value={values.offset}
-                  //onChange={handleChange}
-                  onChange={(e) => {
-                    const newOffset = Math.max(0, parseInt(e.target.value, 10) || 0);
-                    setOffset(newOffset); // Update offset
-                    handleChange(e); // Update formik value
-                  }}
-                  InputProps={{ inputProps: { min: 0 } }}
-                />
-              </Stack>
-            )}
+           {priority === 5 && (
+           <Stack direction="row" spacing={2}>
+             <TextField
+               label="Limit"
+               type="number"
+               name="limit"
+               value={values.limit}
+               onChange={(e) => {
+                 const newLimit = Math.max(1, parseInt(e.target.value, 10) || 1);
+                 setLimit(newLimit); // Update local state
+                 handleChange(e); // Update Formik state
+               }}
+               onBlur={handleBlur}
+               InputProps={{ inputProps: { min: 1 } }}
+               error={Boolean(touched.limit && errors.limit)}
+               helperText={touched.limit && errors.limit ? errors.limit : ''}
+             />
+             <TextField
+               label="Offset"
+               type="number"
+               name="offset"
+               value={values.offset}
+               onChange={(e) => {
+                 const newOffset = Math.max(0, parseInt(e.target.value, 10) || 0);
+                 setOffset(newOffset); // Update local state
+                 handleChange(e); // Update Formik state
+               }}
+               onBlur={handleBlur}
+               InputProps={{ inputProps: { min: 0 } }}
+               error={Boolean(touched.offset && errors.offset)}
+               helperText={touched.offset && errors.offset ? errors.offset : ''}
+               />
+             </Stack>
+           )}
           {priority !== 5 && priority !==4 &&(
             <Stack spacing={1} sx={{ flex: 1 }}>
               <OutlinedInput
@@ -424,6 +439,5 @@ export default function RetrieveBooksPage({
         
       )} 
     </>
-    
   );
 }

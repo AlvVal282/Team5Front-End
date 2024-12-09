@@ -50,13 +50,6 @@ const pages: NavItemType = {
           type: 'item',
           url: '/books/delete',
           icon: icons.DeleteIcon
-        },
-        {
-          id: 'single-book',
-          title: <FormattedMessage id="single" defaultMessage="Single Book" />,
-          type: 'item',
-          url: '/books/single-book',
-          icon: icons.LibraryBooksIcon
         }
       ]
     }
