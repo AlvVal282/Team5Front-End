@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, SyntheticEvent } from 'react';
-import { signIn } from 'next-auth/react';
+import { signIn, signOut } from 'next-auth/react';
 
 // next
 import { useRouter } from 'next/navigation';
@@ -102,9 +102,7 @@ export default function AuthResetPassword() {
               } else {
                 setSuccessMessage('Your password has been successfully changed!');
                 setSubmitting(false);
-                setTimeout(() => {
-                  router.push('/home-page');
-                }, 2000);
+                signOut({ callbackUrl: '/login' });
               }
             },
             (res) => {
